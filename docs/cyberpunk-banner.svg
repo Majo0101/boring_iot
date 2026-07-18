@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="520" viewBox="0 0 1400 520" role="img" aria-labelledby="title desc">
+  <title id="title">Boring IoT cyberpunk banner</title>
+  <desc id="desc">A synthwave cyberpunk banner with a neon sun, grid horizon, mountains, Japanese text, and the Boring IoT logo.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#16042f"/>
+      <stop offset="0.45" stop-color="#25064d"/>
+      <stop offset="1" stop-color="#050713"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff2aba"/>
+      <stop offset="0.48" stop-color="#ff61cf"/>
+      <stop offset="0.8" stop-color="#9cd7ff"/>
+      <stop offset="1" stop-color="#fff0ff"/>
+    </linearGradient>
+    <linearGradient id="gridFade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff2aba" stop-opacity="0"/>
+      <stop offset="0.25" stop-color="#ff2aba" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#00f5ff" stop-opacity="0.25"/>
+    </linearGradient>
+    <filter id="cyanGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="hotGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="scanlines" width="1" height="8" patternUnits="userSpaceOnUse">
+      <rect width="1" height="1" fill="#ffffff" opacity="0.08"/>
+    </pattern>
+    <clipPath id="circleClip">
+      <circle cx="700" cy="178" r="118"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1400" height="520" fill="url(#sky)"/>
+  <rect width="1400" height="520" fill="url(#scanlines)" opacity="0.5"/>
+
+  <g opacity="0.9">
+    <circle cx="98" cy="70" r="2" fill="#fff7bd"/>
+    <circle cx="220" cy="112" r="2" fill="#ffffff"/>
+    <circle cx="332" cy="60" r="1.7" fill="#ffffff"/>
+    <circle cx="482" cy="96" r="2" fill="#fff7bd"/>
+    <circle cx="1012" cy="82" r="2" fill="#ffffff"/>
+    <circle cx="1188" cy="130" r="1.7" fill="#fff7bd"/>
+    <circle cx="1290" cy="74" r="2" fill="#ffffff"/>
+    <circle cx="1346" cy="192" r="1.7" fill="#ffffff"/>
+  </g>
+
+  <g filter="url(#hotGlow)">
+    <circle cx="700" cy="178" r="118" fill="url(#sun)"/>
+    <g clip-path="url(#circleClip)">
+      <rect x="560" y="92" width="280" height="12" fill="#140424" opacity="0.86"/>
+      <rect x="560" y="130" width="280" height="12" fill="#140424" opacity="0.86"/>
+      <rect x="560" y="168" width="280" height="12" fill="#140424" opacity="0.86"/>
+      <rect x="560" y="206" width="280" height="12" fill="#140424" opacity="0.86"/>
+      <rect x="560" y="244" width="280" height="12" fill="#140424" opacity="0.86"/>
+    </g>
+  </g>
+
+  <path d="M0 325 L95 292 L160 326 L240 260 L330 320 L440 265 L565 330 L680 280 L810 328 L920 286 L1040 318 L1195 252 L1400 326 L1400 520 L0 520 Z"
+        fill="#12072d" stroke="#00f5ff" stroke-opacity="0.42" stroke-width="2"/>
+  <path d="M0 365 L125 338 L230 363 L345 318 L470 360 L612 320 L760 364 L900 326 L1030 358 L1160 316 L1400 364"
+        fill="none" stroke="#ff2aba" stroke-width="3" filter="url(#hotGlow)"/>
+
+  <g opacity="0.9">
+    <path d="M0 394 H1400" stroke="#ff2aba" stroke-width="3" filter="url(#hotGlow)"/>
+    <path d="M-160 520 L420 394 M0 520 L520 394 M160 520 L620 394 M320 520 L700 394 M500 520 L780 394 M680 520 L860 394 M860 520 L940 394 M1040 520 L1020 394 M1220 520 L1100 394 M1400 520 L1180 394"
+          stroke="#ff2aba" stroke-width="1.6" opacity="0.85"/>
+    <path d="M0 430 H1400 M0 458 H1400 M0 486 H1400 M0 512 H1400"
+          stroke="#00f5ff" stroke-width="1.4" opacity="0.55"/>
+  </g>
+
+  <g font-family="Impact, Arial Black, Arial, sans-serif" font-size="142" font-weight="900" letter-spacing="-4">
+    <text x="116" y="250" fill="#00f5ff" opacity="0.9">BORING</text>
+    <text x="132" y="262" fill="#ff2aba" opacity="0.9">BORING</text>
+    <text x="124" y="255" fill="#f8fbff">BORING</text>
+    <text x="116" y="372" fill="#00f5ff" opacity="0.9">IOT</text>
+    <text x="132" y="384" fill="#ff2aba" opacity="0.9">IOT</text>
+    <text x="124" y="377" fill="#f8fbff">IOT</text>
+  </g>
+
+  <g font-family="Arial, sans-serif" font-size="34" font-weight="900" fill="#ffee9d" filter="url(#hotGlow)">
+    <text x="62" y="80" writing-mode="tb">温度監視回路光</text>
+    <text x="1296" y="80" writing-mode="tb">電子部品未来制御</text>
+  </g>
+
+  <g font-family="Arial, sans-serif" font-weight="900" letter-spacing="3" filter="url(#cyanGlow)">
+    <text x="98" y="72" font-size="18" fill="#00f5ff">COMPONENT CARTEL TELEMETRY LAB</text>
+    <text x="858" y="476" font-size="16" fill="#00f5ff" opacity="0.36">0101 // TEMP BUS // SENSOR ONLINE // NEON SAFE MODE</text>
+  </g>
+
+  <rect x="42" y="36" width="1316" height="448" rx="12" fill="none" stroke="#00f5ff" stroke-opacity="0.26"/>
+  <rect x="58" y="52" width="1284" height="416" rx="8" fill="none" stroke="#ff2aba" stroke-opacity="0.26"/>
+</svg>
