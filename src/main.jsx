@@ -207,6 +207,19 @@ function App() {
       <div className="ambient-grid" aria-hidden="true" />
       <section className="dashboard">
         <section className="brand-hero" aria-label="Project identity">
+          <div className="synth-scene" aria-hidden="true">
+            <div className="star-field" />
+            <div className="sun" />
+            <div className="mountains mountain-back" />
+            <div className="mountains mountain-front" />
+            <div className="horizon-glow" />
+          </div>
+          <div className="jp-column jp-left" aria-hidden="true">
+            温度 監視 回路 光
+          </div>
+          <div className="jp-column jp-right" aria-hidden="true">
+            電子 部品 未来 制御
+          </div>
           <p className="eyebrow">Component Cartel telemetry lab</p>
           <div className="glitch-title" data-text="Boring IOT">
             Boring IOT
@@ -215,6 +228,7 @@ function App() {
             <span>ESP32 uplink</span>
             <span>DS18B20 thermal feed</span>
             <span>WS2812B color logic</span>
+            <span>ネオン温度</span>
           </div>
         </section>
 
