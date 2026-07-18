@@ -204,7 +204,20 @@ function App() {
 
   return (
     <main className="page">
+      <div className="ambient-grid" aria-hidden="true" />
       <section className="dashboard">
+        <section className="brand-hero" aria-label="Project identity">
+          <p className="eyebrow">Component Cartel telemetry lab</p>
+          <div className="glitch-title" data-text="Boring IOT">
+            Boring IOT
+          </div>
+          <div className="hero-subline">
+            <span>ESP32 uplink</span>
+            <span>DS18B20 thermal feed</span>
+            <span>WS2812B color logic</span>
+          </div>
+        </section>
+
         <header className="topbar">
           <div>
             <p className="eyebrow">ESP32 // Supabase // live dashboard</p>

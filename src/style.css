@@ -18,6 +18,7 @@ body {
   background:
     radial-gradient(circle at 14% 12%, rgba(0, 245, 255, 0.18), transparent 28%),
     radial-gradient(circle at 88% 78%, rgba(255, 42, 186, 0.16), transparent 30%),
+    radial-gradient(circle at 48% 0%, rgba(255, 230, 0, 0.08), transparent 24%),
     linear-gradient(135deg, #06070b 0%, #12151d 52%, #252a33 100%);
 }
 
@@ -40,17 +41,54 @@ button:disabled {
 }
 
 .page {
+  position: relative;
   min-height: 100vh;
   padding: 28px;
+  overflow: hidden;
+}
+
+.page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.03) 0,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 6px
+  );
+  mix-blend-mode: screen;
+  opacity: 0.24;
+}
+
+.ambient-grid {
+  position: fixed;
+  inset: auto -12% -36% -12%;
+  height: 58vh;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    linear-gradient(rgba(0, 245, 255, 0.15), transparent 60%),
+    repeating-linear-gradient(90deg, rgba(0, 245, 255, 0.22) 0 1px, transparent 1px 82px),
+    repeating-linear-gradient(0deg, rgba(255, 42, 186, 0.16) 0 1px, transparent 1px 46px);
+  filter: drop-shadow(0 0 26px rgba(0, 245, 255, 0.32));
+  transform: perspective(520px) rotateX(62deg);
+  transform-origin: bottom;
 }
 
 .dashboard {
+  position: relative;
+  z-index: 1;
   width: min(1180px, 100%);
   margin: 0 auto;
   display: grid;
   gap: 18px;
 }
 
+.brand-hero,
 .topbar,
 .temperature-card,
 .device-card,
@@ -65,6 +103,98 @@ button:disabled {
     0 22px 70px rgba(0, 0, 0, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(18px);
+}
+
+.brand-hero {
+  position: relative;
+  min-height: 300px;
+  padding: clamp(24px, 6vw, 52px);
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(10, 12, 18, 0.96), rgba(20, 17, 31, 0.78)),
+    radial-gradient(circle at 18% 30%, rgba(0, 245, 255, 0.18), transparent 34%),
+    radial-gradient(circle at 78% 54%, rgba(255, 42, 186, 0.18), transparent 32%);
+}
+
+.brand-hero::before {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(255, 42, 186, 0.22);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.brand-hero::after {
+  content: "0101 // TEMP BUS // SENSOR ONLINE // NEON SAFE MODE";
+  position: absolute;
+  right: -90px;
+  bottom: 28px;
+  color: rgba(0, 245, 255, 0.18);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  transform: rotate(-8deg);
+  white-space: nowrap;
+}
+
+.glitch-title {
+  position: relative;
+  width: max-content;
+  max-width: 100%;
+  margin-top: 12px;
+  color: #f8fbff;
+  font-size: clamp(4.4rem, 16vw, 12rem);
+  font-weight: 950;
+  line-height: 0.82;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  text-shadow:
+    4px 0 0 rgba(255, 42, 186, 0.82),
+    -4px 0 0 rgba(0, 245, 255, 0.72),
+    0 0 52px rgba(0, 245, 255, 0.24);
+}
+
+.glitch-title::before,
+.glitch-title::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.glitch-title::before {
+  color: rgba(0, 245, 255, 0.72);
+  transform: translate(-5px, -2px);
+  clip-path: inset(0 0 56% 0);
+}
+
+.glitch-title::after {
+  color: rgba(255, 42, 186, 0.72);
+  transform: translate(5px, 2px);
+  clip-path: inset(58% 0 10% 0);
+}
+
+.hero-subline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.hero-subline span {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  color: #d7e2ed;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(0, 245, 255, 0.18);
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .topbar {
@@ -116,7 +246,20 @@ h2 {
 .temperature-card,
 .device-card,
 .history-panel {
+  position: relative;
   padding: 24px;
+  overflow: hidden;
+}
+
+.temperature-card::after,
+.history-panel::after {
+  content: "";
+  position: absolute;
+  inset: auto 18px 18px auto;
+  width: 86px;
+  height: 3px;
+  background: linear-gradient(90deg, #00f5ff, #ff2aba);
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.42);
 }
 
 .card-label,
@@ -292,5 +435,13 @@ h2 {
   .hero-grid,
   .stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .brand-hero {
+    min-height: 240px;
+  }
+
+  .glitch-title {
+    font-size: clamp(3.6rem, 18vw, 6.4rem);
   }
 }
