@@ -90,6 +90,8 @@ void printDiagnostics() {
   Serial.println(strlen(WIFI_SSID) > 0 && String(WIFI_SSID) != "YOUR_WIFI_NAME" ? "ANO" : "NIE");
   Serial.print("Supabase URL: ");
   Serial.println(SUPABASE_URL);
+  Serial.print("Device token nastavene: ");
+  Serial.println(strlen(DEVICE_TOKEN) > 0 && String(DEVICE_TOKEN) != "YOUR_DEVICE_TOKEN" && String(DEVICE_TOKEN) != "PASTE_THE_SAME_TOKEN_FROM_SUPABASE_SQL" ? "ANO" : "NIE");
   Serial.print("Upload interval ms: ");
   Serial.println(UPLOAD_INTERVAL_MS);
   Serial.println("============================");
@@ -116,6 +118,7 @@ bool uploadTemperature(float tempC) {
   http.addHeader("apikey", SUPABASE_KEY);
   http.addHeader("Authorization", String("Bearer ") + SUPABASE_KEY);
   http.addHeader("Content-Type", "application/json");
+  http.addHeader("x-device-token", DEVICE_TOKEN);
   http.addHeader("Prefer", "return=minimal");
 
   String payload = "{\"device_id\":\"" + String(DEVICE_ID) + "\",\"temperature_c\":" + String(tempC, 2) + "}";
