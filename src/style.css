@@ -404,10 +404,11 @@ h2 {
 .current-temperature {
   margin: 20px 0;
   color: #f8fbff;
-  font-size: clamp(5rem, 16vw, 10rem);
+  font-size: clamp(4.5rem, 12vw, 8.6rem);
   font-weight: 950;
   line-height: 0.86;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   text-shadow: 0 0 40px rgba(0, 245, 255, 0.28);
 }
 
@@ -428,10 +429,11 @@ h2 {
 .current-pressure {
   margin: 24px 0 18px;
   color: #f8fbff;
-  font-size: clamp(3rem, 8vw, 5.7rem);
+  font-size: clamp(3rem, 6.4vw, 5rem);
   font-weight: 950;
   line-height: 0.9;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   text-shadow:
     0 0 30px rgba(255, 238, 157, 0.2),
     0 0 44px rgba(0, 245, 255, 0.18);
@@ -488,7 +490,7 @@ h2 {
 
 .prediction-list div {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 10px;
   min-height: 58px;
@@ -563,7 +565,7 @@ h2 {
 .stats-grid strong {
   display: block;
   margin-top: 10px;
-  font-size: clamp(1.5rem, 4vw, 2.4rem);
+  font-size: clamp(1.35rem, 3.2vw, 2.2rem);
   font-variant-numeric: tabular-nums;
 }
 
@@ -672,7 +674,42 @@ h2 {
   color: #ff86d9;
 }
 
-@media (max-width: 820px) {
+@media (max-width: 1120px) {
+  .dashboard {
+    width: 100%;
+  }
+
+  .hero-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .prediction-card,
+  .device-card {
+    grid-column: 1 / -1;
+  }
+
+  .prediction-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .current-temperature {
+    font-size: clamp(4.8rem, 13vw, 7.6rem);
+  }
+
+  .current-pressure {
+    font-size: clamp(3.2rem, 8vw, 5rem);
+  }
+
+  h1 {
+    font-size: clamp(2.6rem, 7.4vw, 4.8rem);
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
   .page {
     padding: 14px;
   }
@@ -688,6 +725,31 @@ h2 {
     grid-template-columns: 1fr;
   }
 
+  .temperature-card,
+  .pressure-card,
+  .prediction-card,
+  .device-card,
+  .history-panel,
+  .topbar {
+    padding: 18px;
+  }
+
+  .current-temperature {
+    font-size: clamp(4.2rem, 24vw, 6.9rem);
+  }
+
+  .current-temperature span {
+    font-size: clamp(1.4rem, 8vw, 2.4rem);
+  }
+
+  .current-pressure {
+    font-size: clamp(3.3rem, 18vw, 5rem);
+  }
+
+  .prediction-card strong {
+    font-size: clamp(1.8rem, 10vw, 2.8rem);
+  }
+
   .prediction-list div {
     grid-template-columns: 1fr;
     align-items: start;
@@ -698,6 +760,6 @@ h2 {
   }
 
   .glitch-title {
-    font-size: clamp(3.6rem, 18vw, 6.4rem);
+    font-size: clamp(3.6rem, 17vw, 6.4rem);
   }
 }
