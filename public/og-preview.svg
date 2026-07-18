@@ -1,0 +1,92 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sky" x1="600" y1="0" x2="600" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#16052f"/>
+      <stop offset="0.42" stop-color="#23005a"/>
+      <stop offset="0.74" stop-color="#080912"/>
+      <stop offset="1" stop-color="#03050a"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="600" y1="82" x2="600" y2="350" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff2aba"/>
+      <stop offset="0.52" stop-color="#ff69d5"/>
+      <stop offset="0.82" stop-color="#9ad4ff"/>
+      <stop offset="1" stop-color="#fff0ff"/>
+    </linearGradient>
+    <linearGradient id="gridFade" x1="600" y1="350" x2="600" y2="660" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff2aba" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#00f5ff" stop-opacity="0.1"/>
+    </linearGradient>
+    <filter id="cyanGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="pinkGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#sky)"/>
+  <rect width="1200" height="630" fill="url(#sky)"/>
+
+  <g opacity="0.9">
+    <circle cx="86" cy="76" r="2" fill="#fff7b8"/>
+    <circle cx="176" cy="42" r="1.8" fill="#ffffff"/>
+    <circle cx="286" cy="104" r="2" fill="#fff7b8"/>
+    <circle cx="412" cy="64" r="1.6" fill="#ffffff"/>
+    <circle cx="505" cy="132" r="2" fill="#ffffff"/>
+    <circle cx="708" cy="46" r="1.8" fill="#fff7b8"/>
+    <circle cx="814" cy="120" r="2" fill="#ffffff"/>
+    <circle cx="928" cy="68" r="1.8" fill="#fff7b8"/>
+    <circle cx="1070" cy="112" r="2" fill="#ffffff"/>
+    <circle cx="1136" cy="42" r="1.6" fill="#ffffff"/>
+  </g>
+
+  <g filter="url(#pinkGlow)">
+    <circle cx="600" cy="212" r="132" fill="url(#sun)"/>
+    <rect x="468" y="160" width="264" height="16" fill="#16052f" opacity="0.58"/>
+    <rect x="468" y="198" width="264" height="16" fill="#16052f" opacity="0.58"/>
+    <rect x="468" y="236" width="264" height="16" fill="#16052f" opacity="0.58"/>
+    <rect x="468" y="274" width="264" height="16" fill="#16052f" opacity="0.58"/>
+  </g>
+
+  <path d="M0 362 L76 318 L146 356 L236 296 L338 364 L446 292 L566 362 L670 312 L782 362 L906 286 L1014 354 L1200 300 V630 H0 Z" fill="#160b35"/>
+  <path d="M0 382 L92 344 L178 374 L272 330 L392 384 L522 318 L644 382 L756 336 L874 382 L986 322 L1106 374 L1200 334 V630 H0 Z" fill="#090b21"/>
+  <path d="M0 362 L76 318 L146 356 L236 296 L338 364 L446 292 L566 362 L670 312 L782 362 L906 286 L1014 354 L1200 300" stroke="#00f5ff" stroke-width="3" opacity="0.7"/>
+  <path d="M0 382 L92 344 L178 374 L272 330 L392 384 L522 318 L644 382 L756 336 L874 382 L986 322 L1106 374 L1200 334" stroke="#ff2aba" stroke-width="3" opacity="0.9"/>
+
+  <g opacity="0.82" filter="url(#pinkGlow)">
+    <path d="M0 418 H1200" stroke="#ff2aba" stroke-width="3"/>
+    <path d="M-80 630 L314 418" stroke="url(#gridFade)" stroke-width="2"/>
+    <path d="M80 630 L382 418" stroke="url(#gridFade)" stroke-width="2"/>
+    <path d="M240 630 L450 418" stroke="url(#gridFade)" stroke-width="2"/>
+    <path d="M400 630 L518 418" stroke="url(#gridFade)" stroke-width="2"/>
+    <path d="M560 630 L586 418" stroke="url(#gridFade)" stroke-width="2"/>
+    <path d="M720 630 L654 418" stroke="url(#gridFade)" stroke-width="2"/>
+    <path d="M880 630 L722 418" stroke="url(#gridFade)" stroke-width="2"/>
+    <path d="M1040 630 L790 418" stroke="url(#gridFade)" stroke-width="2"/>
+    <path d="M1200 630 L858 418" stroke="url(#gridFade)" stroke-width="2"/>
+    <path d="M0 470 H1200" stroke="#9b00ff" stroke-width="2" opacity="0.75"/>
+    <path d="M0 518 H1200" stroke="#9b00ff" stroke-width="2" opacity="0.65"/>
+    <path d="M0 566 H1200" stroke="#9b00ff" stroke-width="2" opacity="0.52"/>
+    <path d="M0 610 H1200" stroke="#9b00ff" stroke-width="2" opacity="0.42"/>
+  </g>
+
+  <rect x="56" y="44" width="1088" height="542" rx="16" stroke="#00f5ff" stroke-opacity="0.42" stroke-width="2"/>
+  <rect x="78" y="458" width="292" height="84" rx="6" fill="#050a14" fill-opacity="0.78" stroke="#00f5ff" stroke-opacity="0.38"/>
+  <text x="104" y="492" fill="#00f5ff" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="900" letter-spacing="4">LIVE TEMP FEED</text>
+  <text x="104" y="526" fill="#f8fbff" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="900">TEMP + PRESSURE + 30 MIN FORECAST</text>
+
+  <text x="600" y="126" text-anchor="middle" fill="#00f5ff" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="900" letter-spacing="6">COMPONENT CARTEL TELEMETRY LAB</text>
+  <text x="600" y="290" text-anchor="middle" fill="#f8fbff" font-family="Inter, Arial Black, sans-serif" font-size="142" font-weight="900" letter-spacing="-2" filter="url(#cyanGlow)">BORING IOT</text>
+  <text x="596" y="290" text-anchor="middle" fill="#ff2aba" font-family="Inter, Arial Black, sans-serif" font-size="142" font-weight="900" letter-spacing="-2" opacity="0.8">BORING IOT</text>
+  <text x="604" y="290" text-anchor="middle" fill="#00f5ff" font-family="Inter, Arial Black, sans-serif" font-size="142" font-weight="900" letter-spacing="-2" opacity="0.72">BORING IOT</text>
+  <text x="600" y="364" text-anchor="middle" fill="#fff7b8" font-family="Inter, Arial, sans-serif" font-size="46" font-weight="900" letter-spacing="2">FORECAST TEMP MONITOR</text>
+  <text x="600" y="402" text-anchor="middle" fill="#d7e2ed" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800" letter-spacing="4">ESP32-S3 // BMP280 // SUPABASE</text>
+</svg>

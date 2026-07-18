@@ -5,7 +5,8 @@ import "./style.css";
 const SUPABASE_URL = "https://yfnirgvfpxgxkdgcfbgy.supabase.co";
 const SUPABASE_KEY = "sb_publishable_-b3sPNu7d0xhzAzdUnB8_A_-fQ-1thd";
 const TABLE_NAME = "temperature_readings";
-const HISTORY_LIMIT = 120;
+const HISTORY_LIMIT = 960;
+const PREDICTION_MINUTES = 30;
 
 function formatTemperature(value) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) {
@@ -13,6 +14,23 @@ function formatTemperature(value) {
   }
 
   return Number(value).toFixed(1);
+}
+
+function formatPressure(value) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+    return "----.-";
+  }
+
+  return Number(value).toFixed(1);
+}
+
+function formatSigned(value, digits = 1) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+    return "--";
+  }
+
+  const number = Number(value);
+  return `${number >= 0 ? "+" : ""}${number.toFixed(digits)}`;
 }
 
 function formatTime(value) {
@@ -47,8 +65,12 @@ function getDeviceStatus(reading) {
   return minutesOld <= 2 ? "Online" : "Offline";
 }
 
-function getStats(readings) {
-  if (!readings.length) {
+function getStats(readings, fieldName) {
+  const values = readings
+    .map((reading) => Number(reading[fieldName]))
+    .filter((value) => Number.isFinite(value));
+
+  if (!values.length) {
     return {
       minimum: null,
       maximum: null,
@@ -56,7 +78,6 @@ function getStats(readings) {
     };
   }
 
-  const values = readings.map((reading) => Number(reading.temperature_c));
   const sum = values.reduce((total, value) => total + value, 0);
 
   return {
@@ -66,7 +87,82 @@ function getStats(readings) {
   };
 }
 
-function TemperatureChart({ readings }) {
+function predictField(readings, fieldName, minutesAhead = PREDICTION_MINUTES) {
+  const points = [...readings]
+    .reverse()
+    .map((reading) => ({
+      time: new Date(reading.created_at).getTime(),
+      value: Number(reading[fieldName])
+    }))
+    .filter((point) => Number.isFinite(point.time) && Number.isFinite(point.value));
+
+  if (points.length < 3) {
+    return null;
+  }
+
+  const baseTime = points[0].time;
+  const samples = points.map((point) => ({
+    x: (point.time - baseTime) / 60000,
+    y: point.value
+  }));
+
+  const count = samples.length;
+  const sumX = samples.reduce((sum, sample) => sum + sample.x, 0);
+  const sumY = samples.reduce((sum, sample) => sum + sample.y, 0);
+  const sumXY = samples.reduce((sum, sample) => sum + sample.x * sample.y, 0);
+  const sumXX = samples.reduce((sum, sample) => sum + sample.x * sample.x, 0);
+  const denominator = count * sumXX - sumX * sumX;
+
+  if (denominator === 0) {
+    return null;
+  }
+
+  const slopePerMinute = (count * sumXY - sumX * sumY) / denominator;
+  const intercept = (sumY - slopePerMinute * sumX) / count;
+  const latestSample = samples[samples.length - 1];
+  const predicted = intercept + slopePerMinute * (latestSample.x + minutesAhead);
+
+  return {
+    predicted,
+    change: predicted - latestSample.y,
+    slopePerHour: slopePerMinute * 60,
+    samples: points.length
+  };
+}
+
+function getTemperatureTrend(prediction) {
+  if (!prediction) {
+    return "Waiting for more data";
+  }
+
+  if (prediction.slopePerHour > 1.2) {
+    return "Heating up";
+  }
+
+  if (prediction.slopePerHour < -1.2) {
+    return "Cooling down";
+  }
+
+  return "Mostly stable";
+}
+
+function getPressureTrend(prediction) {
+  if (!prediction) {
+    return "Waiting for pressure";
+  }
+
+  if (prediction.slopePerHour > 1.2) {
+    return "Pressure rising";
+  }
+
+  if (prediction.slopePerHour < -1.2) {
+    return "Pressure falling";
+  }
+
+  return "Pressure stable";
+}
+
+function TemperatureChart({ readings, prediction }) {
   const points = useMemo(() => [...readings].reverse(), [readings]);
   const width = 900;
   const height = 320;
@@ -85,9 +181,17 @@ function TemperatureChart({ readings }) {
   const times = points.map((point) => new Date(point.created_at).getTime());
   const temperatures = points.map((point) => Number(point.temperature_c));
   const minTime = Math.min(...times);
-  const maxTime = Math.max(...times);
-  const minTemperature = Math.floor(Math.min(...temperatures) - 1);
-  const maxTemperature = Math.ceil(Math.max(...temperatures) + 1);
+  const latestTime = Math.max(...times);
+  const predictedTime =
+    prediction?.predicted !== null && prediction?.predicted !== undefined
+      ? latestTime + PREDICTION_MINUTES * 60000
+      : null;
+  const maxTime = predictedTime ?? latestTime;
+  const chartTemperatures = Number.isFinite(Number(prediction?.predicted))
+    ? [...temperatures, Number(prediction.predicted)]
+    : temperatures;
+  const minTemperature = Math.floor(Math.min(...chartTemperatures) - 1);
+  const maxTemperature = Math.ceil(Math.max(...chartTemperatures) + 1);
   const temperatureRange = Math.max(maxTemperature - minTemperature, 1);
   const timeRange = Math.max(maxTime - minTime, 1);
   const xFor = (time) => margin.left + ((time - minTime) / timeRange) * plotWidth;
@@ -101,6 +205,12 @@ function TemperatureChart({ readings }) {
       return `${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`;
     })
     .join(" ");
+
+  const latestPoint = points[points.length - 1];
+  const predictionPath =
+    predictedTime && Number.isFinite(Number(prediction?.predicted))
+      ? `M ${xFor(new Date(latestPoint.created_at).getTime()).toFixed(2)} ${yFor(Number(latestPoint.temperature_c)).toFixed(2)} L ${xFor(predictedTime).toFixed(2)} ${yFor(Number(prediction.predicted)).toFixed(2)}`
+      : "";
 
   const gridLines = Array.from({ length: 5 }).map((_, index) => {
     const temperature = minTemperature + (temperatureRange * index) / 4;
@@ -134,6 +244,7 @@ function TemperatureChart({ readings }) {
 
       <path className="chart-area" d={`${path} L ${width - margin.right} ${height - margin.bottom} L ${margin.left} ${height - margin.bottom} Z`} />
       <path className="chart-line" d={path} />
+      {predictionPath ? <path className="chart-prediction-line" d={predictionPath} /> : null}
 
       {points.map((point, index) => (
         <circle
@@ -145,11 +256,30 @@ function TemperatureChart({ readings }) {
         />
       ))}
 
+      {predictedTime && Number.isFinite(Number(prediction?.predicted)) ? (
+        <>
+          <circle
+            className="chart-prediction-dot"
+            cx={xFor(predictedTime)}
+            cy={yFor(Number(prediction.predicted))}
+            r="5"
+          />
+          <text
+            className="chart-prediction-label"
+            x={xFor(predictedTime) - 8}
+            y={yFor(Number(prediction.predicted)) - 12}
+            textAnchor="end"
+          >
+            +{PREDICTION_MINUTES} min
+          </text>
+        </>
+      ) : null}
+
       <text className="chart-label" x={margin.left} y={height - 12}>
         {formatTime(points[0].created_at)}
       </text>
       <text className="chart-label" x={width - margin.right} y={height - 12} textAnchor="end">
-        {formatTime(points[points.length - 1].created_at)}
+        {predictedTime ? `Forecast ${formatTime(predictedTime)}` : formatTime(points[points.length - 1].created_at)}
       </text>
     </svg>
   );
@@ -162,7 +292,10 @@ function App() {
   const [lastRefresh, setLastRefresh] = useState(null);
 
   const latest = readings[0] ?? null;
-  const stats = useMemo(() => getStats(readings), [readings]);
+  const temperatureStats = useMemo(() => getStats(readings, "temperature_c"), [readings]);
+  const pressureStats = useMemo(() => getStats(readings, "pressure_hpa"), [readings]);
+  const temperaturePrediction = useMemo(() => predictField(readings, "temperature_c"), [readings]);
+  const pressurePrediction = useMemo(() => predictField(readings, "pressure_hpa"), [readings]);
   const deviceStatus = getDeviceStatus(latest);
 
   async function loadReadings() {
@@ -171,7 +304,7 @@ function App() {
 
     try {
       const url = new URL(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}`);
-      url.searchParams.set("select", "created_at,device_id,temperature_c");
+      url.searchParams.set("select", "created_at,device_id,temperature_c,pressure_hpa,sensor_type");
       url.searchParams.set("order", "created_at.desc");
       url.searchParams.set("limit", String(HISTORY_LIMIT));
 
@@ -235,7 +368,7 @@ function App() {
         <header className="topbar">
           <div>
             <p className="eyebrow">ESP32 // Supabase // live dashboard</p>
-            <h1>LED Temp Monitor</h1>
+            <h1>Forecast Temp Monitor</h1>
           </div>
           <button type="button" onClick={loadReadings} disabled={isLoading}>
             {isLoading ? "Syncing" : "Refresh"}
@@ -251,6 +384,43 @@ function App() {
             </div>
             <div className={`status-badge status-${deviceStatus.toLowerCase().replace(" ", "-")}`}>
               {deviceStatus}
+            </div>
+          </article>
+
+          <article className="pressure-card">
+            <div className="card-label">Current pressure</div>
+            <div className="current-pressure">
+              {formatPressure(latest?.pressure_hpa)}
+              <span>hPa</span>
+            </div>
+            <div className="pressure-meta">
+              <span>{latest?.sensor_type ?? "BMP280"}</span>
+              <span>{getPressureTrend(pressurePrediction)}</span>
+            </div>
+          </article>
+
+          <article className="prediction-card">
+            <div className="card-label">Prediction</div>
+            <strong>{PREDICTION_MINUTES} min forecast</strong>
+            <div className="prediction-list">
+              <div>
+                <span>{getTemperatureTrend(temperaturePrediction)}</span>
+                <b>
+                  {temperaturePrediction
+                    ? `${formatTemperature(temperaturePrediction.predicted)} C`
+                    : "--.- C"}
+                </b>
+                <em>{formatSigned(temperaturePrediction?.change)} C</em>
+              </div>
+              <div>
+                <span>{getPressureTrend(pressurePrediction)}</span>
+                <b>
+                  {pressurePrediction
+                    ? `${formatPressure(pressurePrediction.predicted)} hPa`
+                    : "----.- hPa"}
+                </b>
+                <em>{formatSigned(pressurePrediction?.change)} hPa</em>
+              </div>
             </div>
           </article>
 
@@ -272,16 +442,20 @@ function App() {
 
         <section className="stats-grid" aria-label="Temperature statistics">
           <article>
-            <span>Minimum</span>
-            <strong>{formatTemperature(stats.minimum)} C</strong>
+            <span>Temp min</span>
+            <strong>{formatTemperature(temperatureStats.minimum)} C</strong>
           </article>
           <article>
-            <span>Average</span>
-            <strong>{formatTemperature(stats.average)} C</strong>
+            <span>Temp avg</span>
+            <strong>{formatTemperature(temperatureStats.average)} C</strong>
           </article>
           <article>
-            <span>Maximum</span>
-            <strong>{formatTemperature(stats.maximum)} C</strong>
+            <span>Temp max</span>
+            <strong>{formatTemperature(temperatureStats.maximum)} C</strong>
+          </article>
+          <article>
+            <span>Pressure avg</span>
+            <strong>{formatPressure(pressureStats.average)} hPa</strong>
           </article>
           <article>
             <span>Readings</span>
@@ -298,7 +472,7 @@ function App() {
             <span>{HISTORY_LIMIT} max records</span>
           </div>
 
-          <TemperatureChart readings={readings} />
+          <TemperatureChart readings={readings} prediction={temperaturePrediction} />
 
           {error ? <p className="message error">{error}</p> : null}
           {!error && !readings.length && !isLoading ? (
