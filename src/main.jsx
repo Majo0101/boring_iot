@@ -213,16 +213,6 @@ function App() {
             <div className="mountains mountain-back" />
             <div className="mountains mountain-front" />
             <div className="horizon-glow" />
-            <div className="city-skyline">
-              <span className="tower tower-one" />
-              <span className="tower tower-two" />
-              <span className="tower tower-three" />
-              <span className="tower tower-four" />
-              <span className="billboard board-main">TEMP</span>
-              <span className="billboard board-side">LED</span>
-              <span className="antenna antenna-one" />
-              <span className="antenna antenna-two" />
-            </div>
           </div>
           <div className="jp-column jp-left" aria-hidden="true">
             温度 監視 回路 光

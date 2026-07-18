@@ -107,7 +107,7 @@ button:disabled {
 
 .brand-hero {
   position: relative;
-  min-height: 620px;
+  min-height: 520px;
   padding: clamp(24px, 6vw, 52px);
   overflow: hidden;
   background:
@@ -186,7 +186,7 @@ button:disabled {
   left: -6%;
   right: -6%;
   height: 150px;
-  bottom: 238px;
+  bottom: 168px;
   clip-path: polygon(
     0% 100%,
     0% 72%,
@@ -211,7 +211,7 @@ button:disabled {
 }
 
 .mountain-front {
-  bottom: 206px;
+  bottom: 136px;
   height: 128px;
   opacity: 0.92;
   background:
@@ -225,201 +225,13 @@ button:disabled {
   position: absolute;
   left: -10%;
   right: -10%;
-  bottom: 204px;
+  bottom: 134px;
   height: 3px;
   background: #ff2aba;
   box-shadow:
     0 0 18px #ff2aba,
     0 0 38px rgba(0, 245, 255, 0.8),
     0 0 80px rgba(255, 42, 186, 0.9);
-}
-
-.city-skyline {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 260px;
-  background:
-    linear-gradient(180deg, transparent 0%, rgba(8, 4, 18, 0.18) 18%, rgba(5, 5, 12, 0.92) 72%, #02030a 100%),
-    repeating-linear-gradient(90deg, rgba(255, 42, 186, 0.13) 0 1px, transparent 1px 76px);
-}
-
-.city-skyline::before,
-.city-skyline::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-
-.city-skyline::before {
-  height: 210px;
-  background:
-    linear-gradient(90deg, transparent 0 4%, #080812 4% 12%, transparent 12% 15%, #0b0715 15% 24%, transparent 24% 29%, #090a14 29% 39%, transparent 39% 44%, #0d0714 44% 55%, transparent 55% 59%, #090912 59% 70%, transparent 70% 75%, #0b0814 75% 88%, transparent 88% 92%, #080812 92% 100%);
-  clip-path: polygon(
-    0 100%,
-    0 58%,
-    6% 58%,
-    6% 35%,
-    12% 35%,
-    12% 70%,
-    18% 70%,
-    18% 26%,
-    25% 26%,
-    25% 64%,
-    32% 64%,
-    32% 42%,
-    39% 42%,
-    39% 100%,
-    45% 100%,
-    45% 22%,
-    56% 22%,
-    56% 62%,
-    63% 62%,
-    63% 36%,
-    71% 36%,
-    71% 74%,
-    77% 74%,
-    77% 30%,
-    88% 30%,
-    88% 56%,
-    95% 56%,
-    95% 100%,
-    100% 100%
-  );
-}
-
-.city-skyline::after {
-  height: 218px;
-  background:
-    radial-gradient(circle at 8% 52%, #ff2aba 0 2px, transparent 3px),
-    radial-gradient(circle at 12% 45%, #00f5ff 0 2px, transparent 3px),
-    radial-gradient(circle at 22% 34%, #ff2aba 0 2px, transparent 3px),
-    radial-gradient(circle at 35% 54%, #ffe86d 0 2px, transparent 3px),
-    radial-gradient(circle at 47% 28%, #ff2aba 0 2px, transparent 3px),
-    radial-gradient(circle at 52% 36%, #00f5ff 0 2px, transparent 3px),
-    radial-gradient(circle at 68% 46%, #ff2aba 0 2px, transparent 3px),
-    radial-gradient(circle at 84% 31%, #ffe86d 0 2px, transparent 3px),
-    radial-gradient(circle at 91% 52%, #00f5ff 0 2px, transparent 3px),
-    repeating-linear-gradient(90deg, transparent 0 18px, rgba(255, 42, 186, 0.7) 18px 22px, transparent 22px 42px),
-    repeating-linear-gradient(0deg, transparent 0 15px, rgba(0, 245, 255, 0.42) 15px 18px, transparent 18px 34px);
-  mask-image: linear-gradient(90deg, transparent 0 4%, #000 4% 12%, transparent 12% 15%, #000 15% 24%, transparent 24% 29%, #000 29% 39%, transparent 39% 44%, #000 44% 55%, transparent 55% 59%, #000 59% 70%, transparent 70% 75%, #000 75% 88%, transparent 88% 92%, #000 92% 100%);
-  opacity: 0.75;
-  filter: drop-shadow(0 0 10px rgba(255, 42, 186, 0.5));
-}
-
-.tower,
-.billboard,
-.antenna {
-  position: absolute;
-  z-index: 1;
-  display: block;
-}
-
-.tower {
-  bottom: 0;
-  background:
-    repeating-linear-gradient(90deg, transparent 0 12px, rgba(255, 42, 186, 0.88) 12px 18px, transparent 18px 30px),
-    repeating-linear-gradient(0deg, transparent 0 14px, rgba(0, 245, 255, 0.48) 14px 18px, transparent 18px 30px),
-    linear-gradient(180deg, #130825, #05050c);
-  border: 1px solid rgba(255, 42, 186, 0.36);
-  box-shadow: 0 0 22px rgba(255, 42, 186, 0.24);
-}
-
-.tower-one {
-  left: 13%;
-  width: 76px;
-  height: 150px;
-}
-
-.tower-two {
-  left: 41%;
-  width: 126px;
-  height: 220px;
-}
-
-.tower-three {
-  right: 26%;
-  width: 92px;
-  height: 170px;
-}
-
-.tower-four {
-  right: 9%;
-  width: 68px;
-  height: 128px;
-}
-
-.billboard {
-  min-width: 88px;
-  min-height: 44px;
-  display: grid;
-  place-items: center;
-  color: #030512;
-  background: #ff2aba;
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  font-size: 0.88rem;
-  font-weight: 950;
-  letter-spacing: 0.12em;
-  box-shadow:
-    0 0 18px rgba(255, 42, 186, 0.82),
-    0 0 42px rgba(255, 42, 186, 0.55);
-}
-
-.board-main {
-  left: calc(41% + 24px);
-  bottom: 112px;
-  width: 82px;
-  height: 78px;
-}
-
-.board-side {
-  left: 10%;
-  bottom: 76px;
-  background: #00f5ff;
-  box-shadow:
-    0 0 18px rgba(0, 245, 255, 0.82),
-    0 0 42px rgba(0, 245, 255, 0.55);
-}
-
-.antenna {
-  bottom: 216px;
-  width: 2px;
-  height: 86px;
-  background: #ff2aba;
-  box-shadow: 0 0 14px rgba(255, 42, 186, 0.9);
-}
-
-.antenna::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: -8px;
-  width: 9px;
-  height: 9px;
-  border-radius: 999px;
-  background: #ff2aba;
-  transform: translateX(-50%);
-  box-shadow: 0 0 16px rgba(255, 42, 186, 1);
-}
-
-.antenna-one {
-  left: 51%;
-}
-
-.antenna-two {
-  right: 31%;
-  bottom: 170px;
-  height: 64px;
-  background: #00f5ff;
-  box-shadow: 0 0 14px rgba(0, 245, 255, 0.9);
-}
-
-.antenna-two::before {
-  background: #00f5ff;
-  box-shadow: 0 0 16px rgba(0, 245, 255, 1);
 }
 
 .jp-column {
@@ -449,7 +261,7 @@ button:disabled {
   z-index: 2;
   width: max-content;
   max-width: 100%;
-  margin-top: 108px;
+  margin-top: 132px;
   color: #f8fbff;
   font-size: clamp(4.4rem, 16vw, 12rem);
   font-weight: 950;
@@ -489,8 +301,7 @@ button:disabled {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 18px;
-  max-width: 760px;
+  margin-top: 28px;
 }
 
 .hero-subline span {
@@ -499,14 +310,14 @@ button:disabled {
   align-items: center;
   padding: 0 12px;
   color: #d7e2ed;
-  background: rgba(8, 8, 18, 0.9);
+  background: rgba(8, 8, 18, 0.72);
   border: 1px solid rgba(255, 42, 186, 0.34);
   border-radius: 4px;
   font-size: 0.78rem;
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  box-shadow: 0 0 18px rgba(255, 42, 186, 0.22), 0 0 18px rgba(0, 245, 255, 0.12);
+  box-shadow: 0 0 18px rgba(255, 42, 186, 0.16);
 }
 
 .topbar {
