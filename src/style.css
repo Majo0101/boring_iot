@@ -597,13 +597,33 @@ h2 {
 }
 
 .chart-grid {
-  stroke: rgba(148, 167, 187, 0.22);
   stroke-width: 1;
+}
+
+.chart-grid-major {
+  stroke: rgba(148, 167, 187, 0.26);
+}
+
+.chart-grid-minor {
+  stroke: rgba(148, 167, 187, 0.12);
+  stroke-dasharray: 3 8;
+}
+
+.chart-hour-grid {
+  stroke: rgba(0, 245, 255, 0.14);
+  stroke-width: 1;
+  stroke-dasharray: 4 10;
 }
 
 .chart-label {
   fill: #94a7bb;
   font-size: 13px;
+}
+
+.chart-time-label {
+  fill: rgba(215, 226, 237, 0.72);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .chart-line {
@@ -620,9 +640,8 @@ h2 {
 .chart-prediction-line {
   fill: none;
   stroke: #ffee9d;
-  stroke-width: 4;
+  stroke-width: 2.5;
   stroke-linecap: round;
-  stroke-dasharray: 12 10;
   filter: drop-shadow(0 0 12px rgba(255, 238, 157, 0.45));
 }
 

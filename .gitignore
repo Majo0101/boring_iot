@@ -5,3 +5,4 @@ s3/config.h
 .DS_Store
 Thumbs.db
 .codex-remote-attachments/
+vite-dev*.log

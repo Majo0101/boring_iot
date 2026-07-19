@@ -24,6 +24,8 @@ const PREDICTION_CONFIG = {
   }
 };
 
+const FORECAST_POINT_COUNT = 12;
+
 function formatTemperature(value) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) {
     return "--.-";
@@ -51,6 +53,69 @@ function formatSigned(value, digits = 1) {
 
 function clamp(value, minimum, maximum) {
   return Math.min(Math.max(value, minimum), maximum);
+}
+
+function solveQuadraticRegression(samples) {
+  const sums = samples.reduce(
+    (total, sample) => {
+      const x2 = sample.x * sample.x;
+      return {
+        x: total.x + sample.x,
+        x2: total.x2 + x2,
+        x3: total.x3 + x2 * sample.x,
+        x4: total.x4 + x2 * x2,
+        y: total.y + sample.y,
+        xy: total.xy + sample.x * sample.y,
+        x2y: total.x2y + x2 * sample.y
+      };
+    },
+    { x: 0, x2: 0, x3: 0, x4: 0, y: 0, xy: 0, x2y: 0 }
+  );
+
+  const matrix = [
+    [samples.length, sums.x, sums.x2, sums.y],
+    [sums.x, sums.x2, sums.x3, sums.xy],
+    [sums.x2, sums.x3, sums.x4, sums.x2y]
+  ];
+
+  for (let pivotIndex = 0; pivotIndex < 3; pivotIndex++) {
+    let bestRow = pivotIndex;
+    for (let row = pivotIndex + 1; row < 3; row++) {
+      if (Math.abs(matrix[row][pivotIndex]) > Math.abs(matrix[bestRow][pivotIndex])) {
+        bestRow = row;
+      }
+    }
+
+    if (Math.abs(matrix[bestRow][pivotIndex]) < 1e-9) {
+      return null;
+    }
+
+    if (bestRow !== pivotIndex) {
+      [matrix[pivotIndex], matrix[bestRow]] = [matrix[bestRow], matrix[pivotIndex]];
+    }
+
+    const pivot = matrix[pivotIndex][pivotIndex];
+    for (let col = pivotIndex; col < 4; col++) {
+      matrix[pivotIndex][col] /= pivot;
+    }
+
+    for (let row = 0; row < 3; row++) {
+      if (row === pivotIndex) {
+        continue;
+      }
+
+      const factor = matrix[row][pivotIndex];
+      for (let col = pivotIndex; col < 4; col++) {
+        matrix[row][col] -= factor * matrix[pivotIndex][col];
+      }
+    }
+  }
+
+  return {
+    a: matrix[0][3],
+    b: matrix[1][3],
+    c: matrix[2][3]
+  };
 }
 
 function formatTime(value) {
@@ -153,20 +218,39 @@ function predictField(readings, fieldName, minutesAhead = PREDICTION_MINUTES) {
   const slopePerMinute = (count * sumXY - sumX * sumY) / denominator;
   const intercept = (sumY - slopePerMinute * sumX) / count;
   const latestSample = samples[samples.length - 1];
-  const predictedRaw = intercept + slopePerMinute * (latestSample.x + minutesAhead);
-  const dampedChange = clamp(
-    (predictedRaw - latestSample.y) * config.damping,
-    -config.maxChange,
-    config.maxChange
-  );
-  const predicted = latestSample.y + dampedChange;
+  const quadratic = solveQuadraticRegression(samples);
+  const predictRaw = (x) => {
+    if (!quadratic) {
+      return intercept + slopePerMinute * x;
+    }
+
+    return quadratic.a + quadratic.b * x + quadratic.c * x * x;
+  };
+
+  const forecastPoints = Array.from({ length: FORECAST_POINT_COUNT }).map((_, index) => {
+    const minutes = ((index + 1) * minutesAhead) / FORECAST_POINT_COUNT;
+    const rawValue = predictRaw(latestSample.x + minutes);
+    const dampedChange = clamp(
+      (rawValue - latestSample.y) * config.damping,
+      -config.maxChange,
+      config.maxChange
+    );
+
+    return {
+      minutes,
+      value: latestSample.y + dampedChange
+    };
+  });
+
+  const predicted = forecastPoints[forecastPoints.length - 1].value;
 
   return {
     predicted,
     change: predicted - latestSample.y,
     slopePerHour: slopePerMinute * 60,
     samples: points.length,
-    windowMinutes: PREDICTION_WINDOW_MINUTES
+    windowMinutes: PREDICTION_WINDOW_MINUTES,
+    forecastPoints
   };
 }
 
@@ -222,16 +306,17 @@ function TemperatureChart({ readings, prediction }) {
   const temperatures = points.map((point) => Number(point.temperature_c));
   const minTime = Math.min(...times);
   const latestTime = Math.max(...times);
-  const predictedTime =
-    prediction?.predicted !== null && prediction?.predicted !== undefined
-      ? latestTime + PREDICTION_MINUTES * 60000
-      : null;
+  const forecastPoints =
+    prediction?.forecastPoints?.map((point) => ({
+      time: latestTime + point.minutes * 60000,
+      value: point.value,
+      minutes: point.minutes
+    })) ?? [];
+  const predictedTime = forecastPoints.length ? forecastPoints[forecastPoints.length - 1].time : null;
   const maxTime = predictedTime ?? latestTime;
-  const chartTemperatures = Number.isFinite(Number(prediction?.predicted))
-    ? [...temperatures, Number(prediction.predicted)]
-    : temperatures;
-  const minTemperature = Math.floor(Math.min(...chartTemperatures) - 1);
-  const maxTemperature = Math.ceil(Math.max(...chartTemperatures) + 1);
+  const chartTemperatures = [...temperatures, ...forecastPoints.map((point) => point.value)];
+  const minTemperature = Math.floor((Math.min(...chartTemperatures) - 0.5) * 2) / 2;
+  const maxTemperature = Math.ceil((Math.max(...chartTemperatures) + 0.5) * 2) / 2;
   const temperatureRange = Math.max(maxTemperature - minTemperature, 1);
   const timeRange = Math.max(maxTime - minTime, 1);
   const xFor = (time) => margin.left + ((time - minTime) / timeRange) * plotWidth;
@@ -247,18 +332,33 @@ function TemperatureChart({ readings, prediction }) {
     .join(" ");
 
   const latestPoint = points[points.length - 1];
-  const predictionPath =
-    predictedTime && Number.isFinite(Number(prediction?.predicted))
-      ? `M ${xFor(new Date(latestPoint.created_at).getTime()).toFixed(2)} ${yFor(Number(latestPoint.temperature_c)).toFixed(2)} L ${xFor(predictedTime).toFixed(2)} ${yFor(Number(prediction.predicted)).toFixed(2)}`
-      : "";
+  const forecastPath = forecastPoints.length
+    ? [
+        `M ${xFor(new Date(latestPoint.created_at).getTime()).toFixed(2)} ${yFor(Number(latestPoint.temperature_c)).toFixed(2)}`,
+        ...forecastPoints.map(
+          (point) => `L ${xFor(point.time).toFixed(2)} ${yFor(point.value).toFixed(2)}`
+        )
+      ].join(" ")
+    : "";
 
-  const gridLines = Array.from({ length: 5 }).map((_, index) => {
-    const temperature = minTemperature + (temperatureRange * index) / 4;
+  const gridLines = Array.from({
+    length: Math.floor((maxTemperature - minTemperature) / 0.5) + 1
+  }).map((_, index) => {
+    const temperature = minTemperature + index * 0.5;
     return {
       temperature,
-      y: yFor(temperature)
+      y: yFor(temperature),
+      major: Number.isInteger(temperature)
     };
   });
+
+  const firstHour = Math.ceil(minTime / 3600000) * 3600000;
+  const hourTicks = [];
+  for (let tick = firstHour; tick < latestTime; tick += 3600000) {
+    if (tick > minTime) {
+      hourTicks.push(tick);
+    }
+  }
 
   return (
     <svg
@@ -270,20 +370,37 @@ function TemperatureChart({ readings, prediction }) {
       {gridLines.map((line) => (
         <g key={line.temperature}>
           <line
-            className="chart-grid"
+            className={line.major ? "chart-grid chart-grid-major" : "chart-grid chart-grid-minor"}
             x1={margin.left}
             x2={width - margin.right}
             y1={line.y}
             y2={line.y}
           />
-          <text className="chart-label" x={margin.left - 12} y={line.y + 4} textAnchor="end">
-            {line.temperature.toFixed(0)} C
+          {line.major ? (
+            <text className="chart-label" x={margin.left - 12} y={line.y + 4} textAnchor="end">
+              {line.temperature.toFixed(0)} C
+            </text>
+          ) : null}
+        </g>
+      ))}
+
+      {hourTicks.map((tick) => (
+        <g key={tick}>
+          <line
+            className="chart-hour-grid"
+            x1={xFor(tick)}
+            x2={xFor(tick)}
+            y1={margin.top}
+            y2={height - margin.bottom}
+          />
+          <text className="chart-time-label" x={xFor(tick)} y={height - 22} textAnchor="middle">
+            {formatTime(tick).slice(0, 5)}
           </text>
         </g>
       ))}
 
       <path className="chart-line" d={path} />
-      {predictionPath ? <path className="chart-prediction-line" d={predictionPath} /> : null}
+      {forecastPath ? <path className="chart-prediction-line" d={forecastPath} /> : null}
 
       <circle
         className="chart-dot"
@@ -292,18 +409,21 @@ function TemperatureChart({ readings, prediction }) {
         r="5"
       />
 
-      {predictedTime && Number.isFinite(Number(prediction?.predicted)) ? (
+      {forecastPoints.length ? (
         <>
-          <circle
-            className="chart-prediction-dot"
-            cx={xFor(predictedTime)}
-            cy={yFor(Number(prediction.predicted))}
-            r="5"
-          />
+          {forecastPoints.map((point, index) => (
+            <circle
+              key={`${point.time}-${index}`}
+              className="chart-prediction-dot"
+              cx={xFor(point.time)}
+              cy={yFor(point.value)}
+              r={index === forecastPoints.length - 1 ? "5" : "3.5"}
+            />
+          ))}
           <text
             className="chart-prediction-label"
-            x={xFor(predictedTime) - 8}
-            y={yFor(Number(prediction.predicted)) - 12}
+            x={xFor(forecastPoints[forecastPoints.length - 1].time) - 8}
+            y={yFor(forecastPoints[forecastPoints.length - 1].value) - 12}
             textAnchor="end"
           >
             +{PREDICTION_MINUTES} min
