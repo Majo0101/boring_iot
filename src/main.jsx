@@ -8,6 +8,9 @@ const TABLE_NAME = "temperature_readings";
 const HISTORY_LIMIT = 960;
 const PREDICTION_MINUTES = 30;
 const PREDICTION_WINDOW_MINUTES = 60;
+const ARCHIVE_MODE_AFTER_HOURS = 24;
+const DEMO_READING_COUNT = 180;
+const DEMO_DEVICE_ID = "archived-demo-signal";
 
 const PREDICTION_CONFIG = {
   temperature_c: {
@@ -25,6 +28,25 @@ const PREDICTION_CONFIG = {
 };
 
 const FORECAST_POINT_COUNT = 12;
+
+function createDemoReadings() {
+  const now = Date.now();
+  const start = now - (DEMO_READING_COUNT - 1) * 30000;
+
+  return Array.from({ length: DEMO_READING_COUNT }, (_, index) => {
+    const wave = Math.sin(index / 18) * 0.42;
+    const drift = index * 0.004;
+    const pulse = Math.sin(index / 5) * 0.05;
+
+    return {
+      created_at: new Date(start + index * 30000).toISOString(),
+      device_id: DEMO_DEVICE_ID,
+      temperature_c: Number((24.6 + wave + drift + pulse).toFixed(2)),
+      pressure_hpa: Number((997.2 + Math.cos(index / 25) * 0.28 - index * 0.001).toFixed(2)),
+      sensor_type: "Demo telemetry"
+    };
+  }).reverse();
+}
 
 function formatTemperature(value) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) {
@@ -78,12 +100,29 @@ function formatDateTime(value) {
   }).format(new Date(value));
 }
 
-function getDeviceStatus(reading) {
+function getReadingAgeHours(reading) {
+  if (!reading) {
+    return null;
+  }
+
+  return (Date.now() - new Date(reading.created_at).getTime()) / 3600000;
+}
+
+function getDeviceStatus(reading, dataMode) {
+  if (dataMode === "demo") {
+    return "Demo";
+  }
+
   if (!reading) {
     return "No data";
   }
 
-  const minutesOld = (Date.now() - new Date(reading.created_at).getTime()) / 60000;
+  const ageHours = getReadingAgeHours(reading);
+  if (ageHours !== null && ageHours >= ARCHIVE_MODE_AFTER_HOURS) {
+    return "Archived";
+  }
+
+  const minutesOld = ageHours * 60;
   return minutesOld <= 2 ? "Online" : "Offline";
 }
 
@@ -366,13 +405,21 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [lastRefresh, setLastRefresh] = useState(null);
+  const [dataMode, setDataMode] = useState("live");
 
   const latest = readings[0] ?? null;
+  const readingAgeHours = getReadingAgeHours(latest);
+  const effectiveDataMode =
+    dataMode === "demo" || (readingAgeHours !== null && readingAgeHours >= ARCHIVE_MODE_AFTER_HOURS)
+      ? dataMode === "demo"
+        ? "demo"
+        : "archived"
+      : "live";
   const temperatureStats = useMemo(() => getStats(readings, "temperature_c"), [readings]);
   const pressureStats = useMemo(() => getStats(readings, "pressure_hpa"), [readings]);
   const temperaturePrediction = useMemo(() => predictField(readings, "temperature_c"), [readings]);
   const pressurePrediction = useMemo(() => predictField(readings, "pressure_hpa"), [readings]);
-  const deviceStatus = getDeviceStatus(latest);
+  const deviceStatus = getDeviceStatus(latest, effectiveDataMode);
 
   async function loadReadings() {
     setIsLoading(true);
@@ -396,10 +443,24 @@ function App() {
       }
 
       const data = await response.json();
-      setReadings(data);
+      if (data.length) {
+        setReadings(data);
+        setDataMode("live");
+      } else {
+        setReadings(createDemoReadings());
+        setDataMode("demo");
+      }
       setLastRefresh(new Date());
     } catch (requestError) {
       setError(requestError.message || "Could not load Supabase data");
+      setReadings((currentReadings) => {
+        if (currentReadings.length) {
+          return currentReadings;
+        }
+
+        setDataMode("demo");
+        return createDemoReadings();
+      });
     } finally {
       setIsLoading(false);
     }
@@ -440,6 +501,17 @@ function App() {
             <span>30 min forecast</span>
           </div>
         </section>
+
+        {effectiveDataMode !== "live" ? (
+          <section className={`archive-banner archive-${effectiveDataMode}`} aria-live="polite">
+            <span>{effectiveDataMode === "demo" ? "Demo snapshot" : "Archived signal"}</span>
+            <strong>
+              {effectiveDataMode === "demo"
+                ? "Live telemetry is unavailable, so the dashboard is showing a generated showcase dataset."
+                : "The device feed is paused; the dashboard is preserving the latest stored telemetry."}
+            </strong>
+          </section>
+        ) : null}
 
         <header className="topbar">
           <div>
@@ -503,7 +575,9 @@ function App() {
           <article className="device-card">
             <div>
               <span className="card-label">Device</span>
-              <strong>{latest?.device_id ?? "Waiting for ESP32"}</strong>
+              <strong>
+                {effectiveDataMode === "demo" ? "Showcase dataset" : latest?.device_id ?? "Waiting for ESP32"}
+              </strong>
             </div>
             <div>
               <span className="card-label">Last reading</span>

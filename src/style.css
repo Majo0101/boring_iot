@@ -89,6 +89,7 @@ button:disabled {
 }
 
 .brand-hero,
+.archive-banner,
 .topbar,
 .temperature-card,
 .pressure-card,
@@ -106,6 +107,41 @@ button:disabled {
     0 22px 70px rgba(0, 0, 0, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(18px);
+}
+
+.archive-banner {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  padding: 14px 18px;
+  overflow: hidden;
+}
+
+.archive-banner span {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  color: #071017;
+  background: #ffee9d;
+  border-radius: 4px;
+  font-size: 0.76rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 0 22px rgba(255, 238, 157, 0.32);
+}
+
+.archive-banner strong {
+  color: #d7e2ed;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.archive-demo span {
+  background: linear-gradient(90deg, #00f5ff, #ff2aba);
 }
 
 .brand-hero {
@@ -541,10 +577,26 @@ h2 {
 }
 
 .status-offline,
-.status-no-data {
+.status-no-data,
+.status-archived,
+.status-demo {
   color: #fff4fb;
   background: rgba(255, 42, 186, 0.18);
   border: 1px solid rgba(255, 42, 186, 0.34);
+}
+
+.status-archived {
+  color: #071017;
+  background: #ffee9d;
+  border-color: rgba(255, 238, 157, 0.62);
+  box-shadow: 0 0 24px rgba(255, 238, 157, 0.26);
+}
+
+.status-demo {
+  color: #071017;
+  background: linear-gradient(90deg, #00f5ff, #ff2aba);
+  border-color: rgba(255, 255, 255, 0.32);
+  box-shadow: 0 0 24px rgba(0, 245, 255, 0.3);
 }
 
 .device-card {
@@ -850,9 +902,14 @@ h2 {
   }
 
   .topbar,
+  .archive-banner,
   .panel-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .archive-banner {
+    grid-template-columns: 1fr;
   }
 
   .hero-grid,
@@ -865,6 +922,7 @@ h2 {
   .prediction-card,
   .device-card,
   .history-panel,
+  .archive-banner,
   .topbar {
     padding: 18px;
   }

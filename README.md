@@ -55,6 +55,7 @@ The ESP32-S3 reads telemetry values, applies a configurable calibration offset, 
 - Mobile responsive cyberpunk dashboard
 - Share preview metadata for link previews
 - Token-protected device inserts through Supabase RLS
+- archived/demo fallback when the live telemetry feed is paused
 - Local firmware config files ignored by git
 
 ## Branches
@@ -154,6 +155,10 @@ The dashboard calculates a lightweight 30 minute trend estimate in the browser:
 - renders the forecast as a yellow continuation of the historical temperature line
 
 This is a practical visualization layer, not a validated data science model. For a more serious DS version, the next step would be backtesting, confidence intervals, sensor calibration, and comparison against baseline models.
+
+## Archive Mode
+
+If the hardware feed is paused, the dashboard keeps presenting the latest stored telemetry instead of breaking the public page. If no live data can be loaded at all, it falls back to a clearly labeled showcase dataset so the project remains presentable as a portfolio demo.
 
 ## Security Notes
 
