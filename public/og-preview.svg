@@ -83,7 +83,7 @@
   <text x="104" y="492" fill="#00f5ff" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="900" letter-spacing="4">LIVE TEMP FEED</text>
   <text x="104" y="526" fill="#f8fbff" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="900">TEMP + PRESSURE + 30 MIN FORECAST</text>
 
-  <text x="600" y="126" text-anchor="middle" fill="#00f5ff" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="900" letter-spacing="6">COMPONENT CARTEL TELEMETRY LAB</text>
+  <text x="600" y="126" text-anchor="middle" fill="#00f5ff" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="900" letter-spacing="6">RESISTOR MAFIA TELEMETRY LAB</text>
   <text x="600" y="290" text-anchor="middle" fill="#f8fbff" font-family="Inter, Arial Black, sans-serif" font-size="142" font-weight="900" letter-spacing="-2" filter="url(#cyanGlow)">BORING IOT</text>
   <text x="596" y="290" text-anchor="middle" fill="#ff2aba" font-family="Inter, Arial Black, sans-serif" font-size="142" font-weight="900" letter-spacing="-2" opacity="0.8">BORING IOT</text>
   <text x="604" y="290" text-anchor="middle" fill="#00f5ff" font-family="Inter, Arial Black, sans-serif" font-size="142" font-weight="900" letter-spacing="-2" opacity="0.72">BORING IOT</text>

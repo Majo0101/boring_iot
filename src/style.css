@@ -95,7 +95,8 @@ button:disabled {
 .prediction-card,
 .device-card,
 .stats-grid article,
-.history-panel {
+.history-panel,
+.site-footer {
   background:
     linear-gradient(135deg, rgba(18, 22, 30, 0.92), rgba(16, 18, 25, 0.78)),
     linear-gradient(90deg, rgba(0, 245, 255, 0.08), rgba(255, 42, 186, 0.06));
@@ -116,6 +117,13 @@ button:disabled {
     linear-gradient(180deg, rgba(20, 5, 48, 0.96), rgba(13, 5, 28, 0.76) 48%, rgba(4, 7, 16, 0.9)),
     radial-gradient(circle at 50% 26%, rgba(255, 42, 186, 0.28), transparent 28%),
     radial-gradient(circle at 18% 30%, rgba(0, 245, 255, 0.2), transparent 34%);
+}
+
+.brand-hero > .eyebrow {
+  position: relative;
+  z-index: 2;
+  margin-left: clamp(40px, 5vw, 72px);
+  max-width: calc(100% - 130px);
 }
 
 .brand-hero::before {
@@ -640,9 +648,12 @@ h2 {
 .chart-prediction-line {
   fill: none;
   stroke: #ffee9d;
-  stroke-width: 2.5;
+  stroke-width: 3.5;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 12px rgba(255, 238, 157, 0.45));
+  stroke-linejoin: round;
+  filter:
+    drop-shadow(0 0 8px rgba(255, 238, 157, 0.75))
+    drop-shadow(0 0 18px rgba(255, 42, 186, 0.18));
 }
 
 .chart-dot {
@@ -654,9 +665,11 @@ h2 {
 
 .chart-prediction-dot {
   fill: #ffee9d;
-  stroke: #ff2aba;
+  stroke: #071017;
   stroke-width: 1.5;
-  filter: drop-shadow(0 0 12px rgba(255, 238, 157, 0.7));
+  filter:
+    drop-shadow(0 0 8px rgba(255, 238, 157, 0.7))
+    drop-shadow(0 0 14px rgba(255, 238, 157, 0.34));
 }
 
 .chart-prediction-label {
@@ -690,6 +703,110 @@ h2 {
 
 .message.error {
   color: #ff86d9;
+}
+
+.site-footer {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 18px;
+  min-height: 112px;
+  padding: 22px 24px;
+  overflow: hidden;
+}
+
+.site-footer::before {
+  content: "電子 信号 終端 // RESISTOR MAFIA // 0101";
+  position: absolute;
+  right: -34px;
+  bottom: 12px;
+  color: rgba(255, 238, 157, 0.13);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  transform: rotate(-3deg);
+  white-space: nowrap;
+}
+
+.footer-signal {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0, 245, 255, 0.18), transparent 26%, rgba(255, 42, 186, 0.14)),
+    repeating-linear-gradient(90deg, rgba(0, 245, 255, 0.13) 0 1px, transparent 1px 36px),
+    repeating-linear-gradient(0deg, rgba(255, 42, 186, 0.09) 0 1px, transparent 1px 18px);
+  opacity: 0.6;
+}
+
+.site-footer > div:not(.footer-signal),
+.site-footer small {
+  position: relative;
+  z-index: 1;
+}
+
+.site-footer strong {
+  position: relative;
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  color: #f8fbff;
+  font-size: clamp(1.55rem, 3vw, 2.4rem);
+  line-height: 1;
+  text-shadow:
+    2px 0 0 rgba(255, 42, 186, 0.5),
+    -2px 0 0 rgba(0, 245, 255, 0.45),
+    0 0 24px rgba(0, 245, 255, 0.18);
+}
+
+.footer-glitch::before,
+.footer-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.footer-glitch::before {
+  color: rgba(0, 245, 255, 0.72);
+  transform: translate(-2px, -1px);
+  clip-path: inset(0 0 52% 0);
+}
+
+.footer-glitch::after {
+  color: rgba(255, 42, 186, 0.72);
+  transform: translate(2px, 1px);
+  clip-path: inset(55% 0 0 0);
+}
+
+.footer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.footer-meta span {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  color: #d7e2ed;
+  background: rgba(5, 10, 18, 0.7);
+  border: 1px solid rgba(0, 245, 255, 0.22);
+  border-radius: 4px;
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.site-footer small {
+  color: #94a7bb;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-align: right;
 }
 
 @media (max-width: 1120px) {
@@ -773,8 +890,26 @@ h2 {
     align-items: start;
   }
 
+  .site-footer {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .footer-meta {
+    justify-content: flex-start;
+  }
+
+  .site-footer small {
+    text-align: left;
+  }
+
   .brand-hero {
     min-height: 240px;
+  }
+
+  .brand-hero > .eyebrow {
+    margin-left: 34px;
+    max-width: calc(100% - 74px);
   }
 
   .glitch-title {

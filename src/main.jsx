@@ -7,11 +7,11 @@ const SUPABASE_KEY = "sb_publishable_-b3sPNu7d0xhzAzdUnB8_A_-fQ-1thd";
 const TABLE_NAME = "temperature_readings";
 const HISTORY_LIMIT = 960;
 const PREDICTION_MINUTES = 30;
-const PREDICTION_WINDOW_MINUTES = 45;
+const PREDICTION_WINDOW_MINUTES = 60;
 
 const PREDICTION_CONFIG = {
   temperature_c: {
-    damping: 0.55,
+    damping: 0.65,
     maxChange: 1.2,
     minSamples: 6,
     stableSlopePerHour: 0.6
@@ -53,69 +53,6 @@ function formatSigned(value, digits = 1) {
 
 function clamp(value, minimum, maximum) {
   return Math.min(Math.max(value, minimum), maximum);
-}
-
-function solveQuadraticRegression(samples) {
-  const sums = samples.reduce(
-    (total, sample) => {
-      const x2 = sample.x * sample.x;
-      return {
-        x: total.x + sample.x,
-        x2: total.x2 + x2,
-        x3: total.x3 + x2 * sample.x,
-        x4: total.x4 + x2 * x2,
-        y: total.y + sample.y,
-        xy: total.xy + sample.x * sample.y,
-        x2y: total.x2y + x2 * sample.y
-      };
-    },
-    { x: 0, x2: 0, x3: 0, x4: 0, y: 0, xy: 0, x2y: 0 }
-  );
-
-  const matrix = [
-    [samples.length, sums.x, sums.x2, sums.y],
-    [sums.x, sums.x2, sums.x3, sums.xy],
-    [sums.x2, sums.x3, sums.x4, sums.x2y]
-  ];
-
-  for (let pivotIndex = 0; pivotIndex < 3; pivotIndex++) {
-    let bestRow = pivotIndex;
-    for (let row = pivotIndex + 1; row < 3; row++) {
-      if (Math.abs(matrix[row][pivotIndex]) > Math.abs(matrix[bestRow][pivotIndex])) {
-        bestRow = row;
-      }
-    }
-
-    if (Math.abs(matrix[bestRow][pivotIndex]) < 1e-9) {
-      return null;
-    }
-
-    if (bestRow !== pivotIndex) {
-      [matrix[pivotIndex], matrix[bestRow]] = [matrix[bestRow], matrix[pivotIndex]];
-    }
-
-    const pivot = matrix[pivotIndex][pivotIndex];
-    for (let col = pivotIndex; col < 4; col++) {
-      matrix[pivotIndex][col] /= pivot;
-    }
-
-    for (let row = 0; row < 3; row++) {
-      if (row === pivotIndex) {
-        continue;
-      }
-
-      const factor = matrix[row][pivotIndex];
-      for (let col = pivotIndex; col < 4; col++) {
-        matrix[row][col] -= factor * matrix[pivotIndex][col];
-      }
-    }
-  }
-
-  return {
-    a: matrix[0][3],
-    b: matrix[1][3],
-    c: matrix[2][3]
-  };
 }
 
 function formatTime(value) {
@@ -216,24 +153,16 @@ function predictField(readings, fieldName, minutesAhead = PREDICTION_MINUTES) {
   }
 
   const slopePerMinute = (count * sumXY - sumX * sumY) / denominator;
-  const intercept = (sumY - slopePerMinute * sumX) / count;
   const latestSample = samples[samples.length - 1];
-  const quadratic = solveQuadraticRegression(samples);
-  const predictRaw = (x) => {
-    if (!quadratic) {
-      return intercept + slopePerMinute * x;
-    }
-
-    return quadratic.a + quadratic.b * x + quadratic.c * x * x;
-  };
 
   const forecastPoints = Array.from({ length: FORECAST_POINT_COUNT }).map((_, index) => {
     const minutes = ((index + 1) * minutesAhead) / FORECAST_POINT_COUNT;
-    const rawValue = predictRaw(latestSample.x + minutes);
+    const rawChange = slopePerMinute * minutes * config.damping;
+    const scaledMaxChange = config.maxChange * (minutes / minutesAhead);
     const dampedChange = clamp(
-      (rawValue - latestSample.y) * config.damping,
-      -config.maxChange,
-      config.maxChange
+      rawChange,
+      -scaledMaxChange,
+      scaledMaxChange
     );
 
     return {
@@ -411,15 +340,12 @@ function TemperatureChart({ readings, prediction }) {
 
       {forecastPoints.length ? (
         <>
-          {forecastPoints.map((point, index) => (
-            <circle
-              key={`${point.time}-${index}`}
-              className="chart-prediction-dot"
-              cx={xFor(point.time)}
-              cy={yFor(point.value)}
-              r={index === forecastPoints.length - 1 ? "5" : "3.5"}
-            />
-          ))}
+          <circle
+            className="chart-prediction-dot"
+            cx={xFor(forecastPoints[forecastPoints.length - 1].time)}
+            cy={yFor(forecastPoints[forecastPoints.length - 1].value)}
+            r="5"
+          />
           <text
             className="chart-prediction-label"
             x={xFor(forecastPoints[forecastPoints.length - 1].time) - 8}
@@ -431,12 +357,6 @@ function TemperatureChart({ readings, prediction }) {
         </>
       ) : null}
 
-      <text className="chart-label" x={margin.left} y={height - 12}>
-        {formatTime(points[0].created_at)}
-      </text>
-      <text className="chart-label" x={width - margin.right} y={height - 12} textAnchor="end">
-        {predictedTime ? `Forecast ${formatTime(predictedTime)}` : formatTime(points[points.length - 1].created_at)}
-      </text>
     </svg>
   );
 }
@@ -509,7 +429,7 @@ function App() {
           <div className="jp-column jp-right" aria-hidden="true">
             電子 部品 未来 制御
           </div>
-          <p className="eyebrow">Component Cartel telemetry lab</p>
+          <p className="eyebrow">Resistor Mafia telemetry lab</p>
           <div className="glitch-title" data-text="Boring IOT">
             Boring IOT
           </div>
@@ -635,6 +555,20 @@ function App() {
             <p className="message">No Supabase readings yet. Upload from ESP32 and refresh.</p>
           ) : null}
         </section>
+
+        <footer className="site-footer" aria-label="Project footer">
+          <div className="footer-signal" aria-hidden="true" />
+          <div>
+            <p className="eyebrow">Resistor Mafia // signal end</p>
+            <strong className="footer-glitch" data-text="BMSTACK.EU">BMSTACK.EU</strong>
+          </div>
+          <div className="footer-meta">
+            <span>8H history</span>
+            <span>30 min forecast</span>
+            <span>BMP280 telemetry</span>
+          </div>
+          <small>Copyright 2026 Marian Bodnar. All rights reserved.</small>
+        </footer>
       </section>
     </main>
   );
