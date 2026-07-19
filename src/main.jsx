@@ -7,6 +7,22 @@ const SUPABASE_KEY = "sb_publishable_-b3sPNu7d0xhzAzdUnB8_A_-fQ-1thd";
 const TABLE_NAME = "temperature_readings";
 const HISTORY_LIMIT = 960;
 const PREDICTION_MINUTES = 30;
+const PREDICTION_WINDOW_MINUTES = 45;
+
+const PREDICTION_CONFIG = {
+  temperature_c: {
+    damping: 0.55,
+    maxChange: 1.2,
+    minSamples: 6,
+    stableSlopePerHour: 0.6
+  },
+  pressure_hpa: {
+    damping: 0.45,
+    maxChange: 0.8,
+    minSamples: 6,
+    stableSlopePerHour: 0.7
+  }
+};
 
 function formatTemperature(value) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) {
@@ -31,6 +47,10 @@ function formatSigned(value, digits = 1) {
 
   const number = Number(value);
   return `${number >= 0 ? "+" : ""}${number.toFixed(digits)}`;
+}
+
+function clamp(value, minimum, maximum) {
+  return Math.min(Math.max(value, minimum), maximum);
 }
 
 function formatTime(value) {
@@ -88,13 +108,26 @@ function getStats(readings, fieldName) {
 }
 
 function predictField(readings, fieldName, minutesAhead = PREDICTION_MINUTES) {
-  const points = [...readings]
+  const config = PREDICTION_CONFIG[fieldName] ?? PREDICTION_CONFIG.temperature_c;
+  const allPoints = [...readings]
     .reverse()
     .map((reading) => ({
       time: new Date(reading.created_at).getTime(),
       value: Number(reading[fieldName])
     }))
     .filter((point) => Number.isFinite(point.time) && Number.isFinite(point.value));
+
+  if (allPoints.length < 3) {
+    return null;
+  }
+
+  const latestTime = allPoints[allPoints.length - 1].time;
+  const windowStart = latestTime - PREDICTION_WINDOW_MINUTES * 60000;
+  let points = allPoints.filter((point) => point.time >= windowStart);
+
+  if (points.length < config.minSamples) {
+    points = allPoints.slice(-Math.max(config.minSamples, 20));
+  }
 
   if (points.length < 3) {
     return null;
@@ -120,13 +153,20 @@ function predictField(readings, fieldName, minutesAhead = PREDICTION_MINUTES) {
   const slopePerMinute = (count * sumXY - sumX * sumY) / denominator;
   const intercept = (sumY - slopePerMinute * sumX) / count;
   const latestSample = samples[samples.length - 1];
-  const predicted = intercept + slopePerMinute * (latestSample.x + minutesAhead);
+  const predictedRaw = intercept + slopePerMinute * (latestSample.x + minutesAhead);
+  const dampedChange = clamp(
+    (predictedRaw - latestSample.y) * config.damping,
+    -config.maxChange,
+    config.maxChange
+  );
+  const predicted = latestSample.y + dampedChange;
 
   return {
     predicted,
     change: predicted - latestSample.y,
     slopePerHour: slopePerMinute * 60,
-    samples: points.length
+    samples: points.length,
+    windowMinutes: PREDICTION_WINDOW_MINUTES
   };
 }
 
@@ -135,11 +175,11 @@ function getTemperatureTrend(prediction) {
     return "Waiting for more data";
   }
 
-  if (prediction.slopePerHour > 1.2) {
+  if (prediction.slopePerHour > PREDICTION_CONFIG.temperature_c.stableSlopePerHour) {
     return "Heating up";
   }
 
-  if (prediction.slopePerHour < -1.2) {
+  if (prediction.slopePerHour < -PREDICTION_CONFIG.temperature_c.stableSlopePerHour) {
     return "Cooling down";
   }
 
@@ -151,11 +191,11 @@ function getPressureTrend(prediction) {
     return "Waiting for pressure";
   }
 
-  if (prediction.slopePerHour > 1.2) {
+  if (prediction.slopePerHour > PREDICTION_CONFIG.pressure_hpa.stableSlopePerHour) {
     return "Pressure rising";
   }
 
-  if (prediction.slopePerHour < -1.2) {
+  if (prediction.slopePerHour < -PREDICTION_CONFIG.pressure_hpa.stableSlopePerHour) {
     return "Pressure falling";
   }
 
@@ -242,19 +282,15 @@ function TemperatureChart({ readings, prediction }) {
         </g>
       ))}
 
-      <path className="chart-area" d={`${path} L ${width - margin.right} ${height - margin.bottom} L ${margin.left} ${height - margin.bottom} Z`} />
       <path className="chart-line" d={path} />
       {predictionPath ? <path className="chart-prediction-line" d={predictionPath} /> : null}
 
-      {points.map((point, index) => (
-        <circle
-          key={`${point.created_at}-${index}`}
-          className="chart-dot"
-          cx={xFor(new Date(point.created_at).getTime())}
-          cy={yFor(Number(point.temperature_c))}
-          r="4"
-        />
-      ))}
+      <circle
+        className="chart-dot"
+        cx={xFor(new Date(latestPoint.created_at).getTime())}
+        cy={yFor(Number(latestPoint.temperature_c))}
+        r="5"
+      />
 
       {predictedTime && Number.isFinite(Number(prediction?.predicted)) ? (
         <>
@@ -358,16 +394,16 @@ function App() {
             Boring IOT
           </div>
           <div className="hero-subline">
-            <span>ESP32 uplink</span>
-            <span>DS18B20 thermal feed</span>
-            <span>WS2812B color logic</span>
-            <span>ネオン温度</span>
+            <span>ESP32-S3 uplink</span>
+            <span>BMP280 pressure feed</span>
+            <span>Supabase history</span>
+            <span>30 min forecast</span>
           </div>
         </section>
 
         <header className="topbar">
           <div>
-            <p className="eyebrow">ESP32 // Supabase // live dashboard</p>
+            <p className="eyebrow">ESP32-S3 // BMP280 // Supabase // live forecast</p>
             <h1>Forecast Temp Monitor</h1>
           </div>
           <button type="button" onClick={loadReadings} disabled={isLoading}>

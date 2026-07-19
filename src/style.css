@@ -606,17 +606,15 @@ h2 {
   font-size: 13px;
 }
 
-.chart-area {
-  fill: rgba(0, 245, 255, 0.08);
-}
-
 .chart-line {
   fill: none;
   stroke: #00f5ff;
-  stroke-width: 4;
+  stroke-width: 3.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 0 10px rgba(0, 245, 255, 0.45));
+  filter:
+    drop-shadow(0 0 8px rgba(0, 245, 255, 0.75))
+    drop-shadow(0 0 18px rgba(255, 42, 186, 0.28));
 }
 
 .chart-prediction-line {
@@ -630,14 +628,15 @@ h2 {
 
 .chart-dot {
   fill: #ff2aba;
-  stroke: #071017;
-  stroke-width: 2;
+  stroke: #00f5ff;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 12px rgba(255, 42, 186, 0.75));
 }
 
 .chart-prediction-dot {
   fill: #ffee9d;
-  stroke: #071017;
-  stroke-width: 2;
+  stroke: #ff2aba;
+  stroke-width: 1.5;
   filter: drop-shadow(0 0 12px rgba(255, 238, 157, 0.7));
 }
 
